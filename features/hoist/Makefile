@@ -1,0 +1,38 @@
+CONTIKI = $(HOME)/contiki-ng-hoist
+CONTIKI_PROJECT = bridge
+
+WITH_UIP6=1
+UIP_CONF_IPV6=1
+
+#Defaults
+LIFE_UNIT?=0xff
+LIFETIME?=0xffff
+DOUBLINGS?=6
+INTERVAL_MIN?=11
+OF?=rpl_mrhof
+RDC?=0
+SI?=2
+CI?=60
+BPC?=2
+SD?=0
+
+#Optimizations
+CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
+CFLAGS += -ffunction-sections
+LDFLAGS += -Wl,--gc-sections,--undefined=_reset_vector__,--undefined=InterruptVectors,--undefined=_copy_data_init__,--undefined=_clear_bss_init__,--undefined=_end_of_init__
+
+#RPL Initialization
+CFLAGS+= -DUIP_CONF_IPV6_RPL -DRPL_CONF_MAX_INSTANCES=3 -DRPL_ALLOWED_INSTANCES="\"OM\"" 
+CFLAGS+= -DRPL_CONF_DEFAULT_LIFETIME_UNIT=$(LIFE_UNIT) -DRPL_CONF_DEFAULT_LIFETIME=$(LIFETIME)
+#CFLAGS+= -DRPL_CONF_DIO_INTERVAL_DOUBLINGS=2 -DRPL_CONF_DIO_INTERVAL_MIN=9
+CFLAGS+= -DRPL_CONF_DIO_INTERVAL_DOUBLINGS=$(DOUBLINGS) -DRPL_CONF_DIO_INTERVAL_MIN=$(INTERVAL_MIN)
+CFLAGS+= -DRPL_CONF_OF=$(OF) -DRDC_OFF=$(RDC)
+CFLAGS+= -DSEND_INTERVAL=$(SI)
+CFLAGS+= -DBLOCKS_PER_CHECK=$(BPC)
+CFLAGS+= -DSTARTING_DATA=$(SD)
+CFLAGS+= -DCOLLECT_INTERVAL=$(CI)
+
+
+all: $(CONTIKI_PROJECT)
+
+include $(CONTIKI)/Makefile.include
