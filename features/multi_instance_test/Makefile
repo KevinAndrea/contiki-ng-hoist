@@ -1,5 +1,5 @@
 CONTIKI = $(HOME)/contiki-ng-hoist
-CONTIKI_PROJECT = multi-client #multi-server-a multi-server-b
+CONTIKI_PROJECT = multi-client multi-server-a #multi-server-b
 
 #WITH_UIP6=1
 #UIP_CONF_IPV6=1
@@ -22,7 +22,7 @@ MAKE_ROUTING=MAKE_ROUTING_RPL_CLASSIC
 #RDC?=0					# RDC (0 - RDC Off)
 
 #Send Defaults
-SI?=2  		# Send Interval
+SI?=20					# Send Interval in SECONDS
 
 #Optimizations
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
@@ -30,11 +30,11 @@ CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 #LDFLAGS += -Wl,--gc-sections,--undefined=_reset_vector__,--undefined=InterruptVectors,--undefined=_copy_data_init__,--undefined=_clear_bss_init__,--undefined=_end_of_init__
 
 #RPL Initialization
-#CFLAGS+= -DUIP_CONF_IPV6_RPL -DRPL_CONF_MAX_INSTANCES=3 -DRPL_ALLOWED_INSTANCES="\"OM\"" 
+#CFLAGS+= -DUIP_CONF_IPV6_RPL -DRPL_CONF_MAX_INSTANCES=3 -DRPL_ALLOWED_INSTANCES="\"OM\""
 #CFLAGS+= -DRPL_CONF_DEFAULT_LIFETIME_UNIT=$(LIFE_UNIT) -DRPL_CONF_DEFAULT_LIFETIME=$(LIFETIME)
 #CFLAGS+= -DRPL_CONF_DIO_INTERVAL_DOUBLINGS=$(DOUBLINGS) -DRPL_CONF_DIO_INTERVAL_MIN=$(INTERVAL_MIN)
 #CFLAGS+= -DRPL_CONF_OF=$(OF) -DRDC_OFF=$(RDC)
-CFLAGS+= -DSEND_INTERVAL=$(SI)
+CFLAGS+= -DSEND_INTERVAL_SECONDS=$(SI)
 
 all: $(CONTIKI_PROJECT)
 

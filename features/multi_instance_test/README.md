@@ -1,1 +1,2 @@
-# HOIST15
+# Multi-Instance Test Project
+
