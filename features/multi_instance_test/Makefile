@@ -1,5 +1,5 @@
 CONTIKI = $(HOME)/contiki-ng-hoist
-CONTIKI_PROJECT = multi-client multi-server-a #multi-server-b
+CONTIKI_PROJECT = multi-client multi-server-a multi-client-ne multi-server-b
 
 #WITH_UIP6=1
 #UIP_CONF_IPV6=1
@@ -35,6 +35,7 @@ CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 #CFLAGS+= -DRPL_CONF_DIO_INTERVAL_DOUBLINGS=$(DOUBLINGS) -DRPL_CONF_DIO_INTERVAL_MIN=$(INTERVAL_MIN)
 #CFLAGS+= -DRPL_CONF_OF=$(OF) -DRDC_OFF=$(RDC)
 CFLAGS+= -DSEND_INTERVAL_SECONDS=$(SI)
+CFLAGS+= -DRPL_CONF_CUSTOM_INSTANCE=1
 
 all: $(CONTIKI_PROJECT)
 

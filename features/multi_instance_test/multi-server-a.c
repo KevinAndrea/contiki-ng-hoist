@@ -2,6 +2,7 @@
 #include "net/routing/routing.h"
 #include "net/netstack.h"
 #include "net/ipv6/simple-udp.h"
+#include "net/routing/rpl-classic/rpl.h"
 
 #include "sys/log.h"
 #define LOG_MODULE "App"
@@ -10,6 +11,9 @@
 #define WITH_SERVER_REPLY  1
 #define UDP_CLIENT_PORT	8765
 #define UDP_SERVER_PORT	5678
+
+extern int8_t g_rpl_custom_instance;
+extern rpl_instance_t *instance_table[];
 
 static struct simple_udp_connection udp_conn;
 
@@ -40,7 +44,12 @@ PROCESS_THREAD(multi_server_a_process, ev, data)
   PROCESS_BEGIN();
 
   /* Initialize DAG root */
+  g_rpl_custom_instance = 0x1A;
   NETSTACK_ROUTING.root_start();
+
+//  rpl_dag_t *dag = &instance->dag_table[0];
+  int instance_id = instance_table[0]->instance_id;
+  LOG_INFO("My Instance == 0x%x\n", instance_id);
 
   /* Initialize UDP connection */
   simple_udp_register(&udp_conn, UDP_SERVER_PORT, NULL,
