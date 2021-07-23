@@ -146,6 +146,10 @@ struct rpl_dag {
   struct rpl_instance *instance;
   rpl_prefix_t prefix_info;
   uint32_t lifetime;
+  /* GMU-MI
+   * - Moves rpl_parents to the DAG level from Global */
+  nbr_table_t *rpl_parents;
+  /* GMU-MI END */
 };
 typedef struct rpl_dag rpl_dag_t;
 typedef struct rpl_instance rpl_instance_t;
