@@ -30,7 +30,8 @@ CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 #LDFLAGS += -Wl,--gc-sections,--undefined=_reset_vector__,--undefined=InterruptVectors,--undefined=_copy_data_init__,--undefined=_clear_bss_init__,--undefined=_end_of_init__
 
 #RPL Initialization
-#CFLAGS+= -DUIP_CONF_IPV6_RPL -DRPL_CONF_MAX_INSTANCES=3 -DRPL_ALLOWED_INSTANCES="\"OM\""
+#CFLAGS += -DRPL_CONF_MAX_INSTANCES=3    			# 3 Instances are needed by the Bridges (O, M, B)
+#CFLAGS += -DRPL_ALLOWED_INSTANCES="\"OM\""	  # Whitelist
 #CFLAGS+= -DRPL_CONF_DEFAULT_LIFETIME_UNIT=$(LIFE_UNIT) -DRPL_CONF_DEFAULT_LIFETIME=$(LIFETIME)
 #CFLAGS+= -DRPL_CONF_DIO_INTERVAL_DOUBLINGS=$(DOUBLINGS) -DRPL_CONF_DIO_INTERVAL_MIN=$(INTERVAL_MIN)
 #CFLAGS+= -DRPL_CONF_OF=$(OF) -DRDC_OFF=$(RDC)

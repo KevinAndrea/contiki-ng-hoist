@@ -13,7 +13,7 @@
 #define UDP_SERVER_PORT	5678
 
 extern int8_t g_rpl_custom_instance;
-extern rpl_instance_t *instance_table[];
+extern rpl_instance_t instance_table[];
 
 static struct simple_udp_connection udp_conn;
 
@@ -48,7 +48,7 @@ PROCESS_THREAD(multi_server_a_process, ev, data)
   NETSTACK_ROUTING.root_start();
 
 //  rpl_dag_t *dag = &instance->dag_table[0];
-  int instance_id = instance_table[0]->instance_id;
+  int instance_id = instance_table[0].instance_id;
   LOG_INFO("My Instance == 0x%x\n", instance_id);
 
   /* Initialize UDP connection */

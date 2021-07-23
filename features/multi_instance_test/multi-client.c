@@ -34,7 +34,7 @@ static uip_ipaddr_t client_ipaddr;
 
 // Needed to access the DAG ID for multi-instance
 extern rpl_instance_t instance_table[];
-
+extern rpl_instance_t *default_instance;
 /*---------------------------------------------------------------------------*/
 PROCESS(multi_client_process, "Multi-Instance Test Client");
 AUTOSTART_PROCESSES(&multi_client_process);
@@ -72,6 +72,7 @@ PROCESS_THREAD(multi_client_process, ev, data)
   static unsigned count;
   static char str[32];
   static unsigned long interval;
+  static int i;
   uip_ipaddr_t dest_ipaddr;
 
   PROCESS_BEGIN();
@@ -106,11 +107,20 @@ PROCESS_THREAD(multi_client_process, ev, data)
         LOG_INFO("Sending request %u to ", count);
         LOG_INFO_6ADDR(&dest_ipaddr);
         LOG_INFO_("\n");
+
+        LOG_INFO("Printing Instances.  MAX = %d\n", RPL_MAX_INSTANCES);
+        LOG_INFO("--Default Inst:   0x%x\n", default_instance->instance_id);
+        for(i = 0; i < RPL_MAX_INSTANCES; i++) {
+          LOG_INFO("Instance Index:   %d\n", i);
+          LOG_INFO("-- Used:          %d\n", instance_table[i].used);
+          LOG_INFO("-- Instance ID: 0x%x\n", instance_table[i].instance_id);
+        }
         snprintf(str, sizeof(str), "hello %d", count);
         //simple_udp_sendto(&udp_conn, str, strlen(str), &dest_ipaddr);
         uip_udp_packet_sendto(client_conn, str, sizeof(str),
                               &instance_table[0].current_dag->dag_id,
                               UIP_HTONS(UDP_SERVER_PORT));
+        LOG_INFO("SENDING --- %s\n", str);
         count++;
       } else {
         LOG_INFO("Not reachable yet\n");

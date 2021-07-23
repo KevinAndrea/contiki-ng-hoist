@@ -7,7 +7,6 @@
   <project EXPORT="discard">[APPS_DIR]/powertracker</project>
   <simulation>
     <title>Multi Instance Test</title>
-    <speedlimit>10.0</speedlimit>
     <randomseed>123456</randomseed>
     <motedelay_us>1000000</motedelay_us>
     <radiomedium>
@@ -131,11 +130,19 @@
       <motetype_identifier>z12</motetype_identifier>
     </mote>
     <mote>
-      <breakpoints />
+      <breakpoints>
+        <breakpoint>
+          <stops>true</stops>
+          <codefile>[CONTIKI_DIR]/features/multi_instance_test/multi-client.c</codefile>
+          <line>120</line>
+          <contikicode>uip_udp_packet_sendto(client_conn, str, sizeof(str),</contikicode>
+          <color>-16777216</color>
+        </breakpoint>
+      </breakpoints>
       <interface_config>
         org.contikios.cooja.interfaces.Position
-        <x>59.97208744857698</x>
-        <y>64.8583339511654</y>
+        <x>51.45463922843311</x>
+        <y>67.90027974407394</y>
         <z>0.0</z>
       </interface_config>
       <interface_config>
@@ -164,6 +171,10 @@
         org.contikios.cooja.mspmote.interfaces.MspMoteID
         <id>4</id>
       </interface_config>
+      <interface_config>
+        org.contikios.cooja.mspmote.interfaces.MspDefaultSerial
+        <history>l~;...~;l~;a~;</history>
+      </interface_config>
       <motetype_identifier>z14</motetype_identifier>
     </mote>
     <mote>
@@ -187,11 +198,11 @@
   </simulation>
   <plugin>
     org.contikios.cooja.plugins.SimControl
-    <width>280</width>
+    <width>247</width>
     <z>1</z>
-    <height>160</height>
-    <location_x>680</location_x>
-    <location_y>164</location_y>
+    <height>126</height>
+    <location_x>1120</location_x>
+    <location_y>1</location_y>
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.Visualizer
@@ -204,10 +215,10 @@
       <skin>org.contikios.cooja.plugins.skins.MoteTypeVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.AttributeVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.UDGMVisualizerSkin</skin>
-      <viewport>1.6436847795434582 0.0 0.0 1.6436847795434582 312.0576468544334 74.51826571803</viewport>
+      <viewport>1.6436847795434582 0.0 0.0 1.6436847795434582 92.05764685443341 87.51826571803</viewport>
     </plugin_config>
-    <width>674</width>
-    <z>3</z>
+    <width>339</width>
+    <z>2</z>
     <height>400</height>
     <location_x>1</location_x>
     <location_y>1</location_y>
@@ -219,38 +230,35 @@
       <formatted_time />
       <coloring />
     </plugin_config>
-    <width>1162</width>
-    <z>2</z>
+    <width>1369</width>
+    <z>3</z>
     <height>412</height>
-    <location_x>3</location_x>
-    <location_y>401</location_y>
-  </plugin>
-  <plugin>
-    org.contikios.cooja.plugins.Notes
-    <plugin_config>
-      <notes>Enter notes here</notes>
-      <decorations>true</decorations>
-    </plugin_config>
-    <width>488</width>
-    <z>4</z>
-    <height>160</height>
-    <location_x>680</location_x>
-    <location_y>0</location_y>
+    <location_x>-1</location_x>
+    <location_y>404</location_y>
   </plugin>
   <plugin>
     org.contikios.cooja.plugins.RadioLogger
     <plugin_config>
-      <split>150</split>
+      <split>153</split>
       <formatted_time />
       <showdups>false</showdups>
       <hidenodests>false</hidenodests>
       <analyzers name="6lowpan" />
     </plugin_config>
-    <width>1101</width>
+    <width>773</width>
     <z>0</z>
-    <height>340</height>
-    <location_x>26</location_x>
-    <location_y>335</location_y>
+    <height>402</height>
+    <location_x>344</location_x>
+    <location_y>0</location_y>
+  </plugin>
+  <plugin>
+    org.contikios.cooja.plugins.EventListener
+    <plugin_config />
+    <width>279</width>
+    <z>4</z>
+    <height>301</height>
+    <location_x>1113</location_x>
+    <location_y>106</location_y>
   </plugin>
 </simconf>
 
