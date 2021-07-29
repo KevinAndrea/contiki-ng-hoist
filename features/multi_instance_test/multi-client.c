@@ -118,9 +118,9 @@ PROCESS_THREAD(multi_client_process, ev, data)
         snprintf(str, sizeof(str), "hello %d", count);
         //simple_udp_sendto(&udp_conn, str, strlen(str), &dest_ipaddr);
         uip_udp_packet_sendto(client_conn, str, sizeof(str),
-                              &instance_table[0].current_dag->dag_id,
+                              &instance_table[count%2].current_dag->dag_id,
                               UIP_HTONS(UDP_SERVER_PORT));
-        LOG_INFO("SENDING --- %s\n", str);
+        LOG_INFO("SENDING TO IDX: %d --- %s\n", count%2,str);
         count++;
       } else {
         LOG_INFO("Not reachable yet\n");

@@ -97,10 +97,11 @@
 #endif
 
 #ifdef RPL_CONF_OF_OCP
-##### "RPL_CONF_OF_OCP": __________________________ == RPL_CONF_OF_OCP
+##### "RPL_CONF_OF_OCP": _______________________ == RPL_CONF_OF_OCP
 #else
-##### "RPL_CONF_OF_OCP": __________________________ -> RPL_OF_OCP
+##### "RPL_CONF_OF_OCP": _______________________ -> RPL_OF_OCP
 #endif
+##### "RPL_WITH_MC": ___________________________ == RPL_WITH_MC
 
 #endif /* RPL routing */
 
@@ -116,9 +117,13 @@
 ##### "NBR_TABLE_CONF_MAX_NEIGHBORS": __________ -> NBR_TABLE_MAX_NEIGHBORS
 #endif
 
+#ifdef NETSTACK_CONF_WITH_IPV6
+##### "NETSTACK_CONF_WITH_IPV6": _______________ == NETSTACK_CONF_WITH_IPV6
+#endif
 ##### "NETSTACK_MAX_ROUTE_ENTRIES": ____________ == NETSTACK_MAX_ROUTE_ENTRIES
 ##### "UIP_CONF_BUFFER_SIZE": __________________ == UIP_CONF_BUFFER_SIZE
 ##### "UIP_CONF_UDP": __________________________ == UIP_CONF_UDP
+##### "UIP_CONF_ROUTER": _______________________ == UIP_CONF_ROUTER
 
 #ifdef UIP_CONF_UDP_CONNS
 ##### "UIP_CONF_UDP_CONNS": ____________________ == UIP_CONF_UDP_CONNS
