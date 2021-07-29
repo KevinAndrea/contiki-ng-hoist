@@ -584,24 +584,41 @@ rpl_ext_header_remove(void)
   return true;
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * - Modifying this to pull Dest IP from Pkt and IID from that, instead of
+ * -  using the default_instance */
 int
 rpl_ext_header_update(void)
 {
-  if(default_instance == NULL || default_instance->current_dag == NULL
+  /* GMU-MI
+   * - Added this block to set dest_instance to either the found instance
+   *    of the destination, or the default_instance if not found.
+   * - Changed all instances of default_instance to dest_instance below END */
+  rpl_instance_t *dest_instance = NULL;
+  uip_ipaddr_t *dest = &UIP_IP_BUF->destipaddr;
+  if(dest) {
+    dest_instance = rpl_get_instance_from_dest(dest);
+  }
+  if(dest_instance == NULL) {
+    dest_instance = default_instance;
+  }
+  /* GMU-MI END */
+
+  if(dest_instance == NULL || dest_instance->current_dag == NULL
       || uip_is_addr_linklocal(&UIP_IP_BUF->destipaddr) || uip_is_addr_mcast(&UIP_IP_BUF->destipaddr)) {
     return 1;
   }
 
-  if(default_instance->current_dag->rank == ROOT_RANK(default_instance)) {
+  if(dest_instance->current_dag->rank == ROOT_RANK(dest_instance)) {
     /* At the root, remove headers if any, and insert SRH or HBH
     * (SRH is inserted only if the destination is in the DODAG) */
     rpl_ext_header_remove();
     if(rpl_get_dag(&UIP_IP_BUF->destipaddr) != NULL) {
       /* dest is in a DODAG; the packet is going down. */
-      if(RPL_IS_NON_STORING(default_instance)) {
+      if(RPL_IS_NON_STORING(dest_instance)) {
         return insert_srh_header();
       } else {
-        return insert_hbh_header(default_instance);
+        return insert_hbh_header(dest_instance);
       }
     } else {
       /* dest is outside of DODAGs; no ext header is needed. */
@@ -612,12 +629,31 @@ rpl_ext_header_update(void)
         && UIP_IP_BUF->ttl == uip_ds6_if.cur_hop_limit) {
       /* Insert HBH option at source. Checking the address is not sufficient because
        * in non-storing mode, a packet may go up and then down the same path again */
-      return insert_hbh_header(default_instance);
+      return insert_hbh_header(dest_instance);
     } else {
       /* Update HBH option at forwarders */
       return update_hbh_header();
     }
   }
+}
+
+/*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * - New Function to return the instance associated with a dest address. */
+rpl_instance_t *
+rpl_get_instance_from_dest(uip_ipaddr_t *dest)
+{
+  /* Search all known instance for a matching destination (matches DAG ID)
+   * - DAG ID is set using the root's IPv6 address */
+  uint8_t i;
+  uip_ipaddr_t *dag_id;
+  for(i = 0; i < RPL_MAX_INSTANCES; i++) {
+    dag_id = &(instance_table[i].current_dag->dag_id);
+    if(uip_ip6addr_cmp(dest, dag_id) != 0) {
+      return &(instance_table[i]);
+    }
+  }
+  return NULL;
 }
 
 /** @}*/
