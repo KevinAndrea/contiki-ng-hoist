@@ -8,6 +8,7 @@
   <project EXPORT="discard">[APPS_DIR]/mobility</project>
   <simulation>
     <title>Multi_Instance_Test_TwoDir</title>
+    <speedlimit>1.0</speedlimit>
     <randomseed>123456</randomseed>
     <motedelay_us>1000000</motedelay_us>
     <radiomedium>
@@ -114,8 +115,8 @@
       <breakpoints />
       <interface_config>
         org.contikios.cooja.interfaces.Position
-        <x>159.71844813787735</x>
-        <y>197.46806065402345</y>
+        <x>215.07774204924135</x>
+        <y>257.2759708151764</y>
         <z>0.0</z>
       </interface_config>
       <interface_config>
@@ -132,8 +133,8 @@
       <breakpoints />
       <interface_config>
         org.contikios.cooja.interfaces.Position
-        <x>102.40572581430322</x>
-        <y>136.53111186774575</y>
+        <x>131.412789147377</x>
+        <y>165.53817520081955</y>
         <z>0.0</z>
       </interface_config>
       <interface_config>
@@ -168,8 +169,8 @@
       <breakpoints />
       <interface_config>
         org.contikios.cooja.interfaces.Position
-        <x>130.2080524575745</x>
-        <y>165.95262599059518</y>
+        <x>103.32345717326218</x>
+        <y>134.1156052591727</y>
         <z>0.0</z>
       </interface_config>
       <interface_config>
@@ -180,13 +181,53 @@
         org.contikios.cooja.mspmote.interfaces.MspMoteID
         <id>5</id>
       </interface_config>
+      <interface_config>
+        org.contikios.cooja.mspmote.interfaces.MspDefaultSerial
+        <history>IPV6 Route~;l~;'~;;~;'~;</history>
+      </interface_config>
+      <motetype_identifier>z14</motetype_identifier>
+    </mote>
+    <mote>
+      <breakpoints />
+      <interface_config>
+        org.contikios.cooja.interfaces.Position
+        <x>158.97684999642024</x>
+        <y>195.81779399825805</y>
+        <z>0.0</z>
+      </interface_config>
+      <interface_config>
+        org.contikios.cooja.mspmote.interfaces.MspClock
+        <deviation>1.0</deviation>
+      </interface_config>
+      <interface_config>
+        org.contikios.cooja.mspmote.interfaces.MspMoteID
+        <id>6</id>
+      </interface_config>
+      <motetype_identifier>z14</motetype_identifier>
+    </mote>
+    <mote>
+      <breakpoints />
+      <interface_config>
+        org.contikios.cooja.interfaces.Position
+        <x>185.98626238351295</x>
+        <y>227.0942563064221</y>
+        <z>0.0</z>
+      </interface_config>
+      <interface_config>
+        org.contikios.cooja.mspmote.interfaces.MspClock
+        <deviation>1.0</deviation>
+      </interface_config>
+      <interface_config>
+        org.contikios.cooja.mspmote.interfaces.MspMoteID
+        <id>7</id>
+      </interface_config>
       <motetype_identifier>z14</motetype_identifier>
     </mote>
   </simulation>
   <plugin>
     org.contikios.cooja.plugins.SimControl
     <width>280</width>
-    <z>2</z>
+    <z>0</z>
     <height>160</height>
     <location_x>1087</location_x>
     <location_y>0</location_y>
@@ -201,10 +242,10 @@
       <skin>org.contikios.cooja.plugins.skins.LEDVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.GridVisualizerSkin</skin>
       <skin>org.contikios.cooja.plugins.skins.MoteTypeVisualizerSkin</skin>
-      <viewport>1.4134488393125924 0.0 0.0 1.4134488393125924 47.52281397319787 -33.83827386001079</viewport>
+      <viewport>1.4846869590236493 0.0 0.0 1.4846869590236493 -10.727248557556713 -83.70155146671405</viewport>
     </plugin_config>
     <width>400</width>
-    <z>3</z>
+    <z>1</z>
     <height>400</height>
     <location_x>1</location_x>
     <location_y>1</location_y>
@@ -212,12 +253,12 @@
   <plugin>
     org.contikios.cooja.plugins.LogListener
     <plugin_config>
-      <filter />
+      <filter>hello</filter>
       <formatted_time />
       <coloring />
     </plugin_config>
     <width>1364</width>
-    <z>1</z>
+    <z>3</z>
     <height>409</height>
     <location_x>1</location_x>
     <location_y>404</location_y>
@@ -232,10 +273,10 @@
       <analyzers name="6lowpan" />
     </plugin_config>
     <width>688</width>
-    <z>0</z>
+    <z>2</z>
     <height>402</height>
-    <location_x>399</location_x>
-    <location_y>2</location_y>
+    <location_x>401</location_x>
+    <location_y>1</location_y>
   </plugin>
 </simconf>
 

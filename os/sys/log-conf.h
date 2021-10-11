@@ -110,7 +110,7 @@
 /******************************************************************************/
 
 #ifndef LOG_CONF_LEVEL_RPL
-#define LOG_CONF_LEVEL_RPL                         LOG_LEVEL_NONE /* Only for rpl-lite */
+#define LOG_CONF_LEVEL_RPL                         LOG_LEVEL_INFO /* Only for rpl-lite */
 #endif /* LOG_CONF_LEVEL_RPL */
 
 #ifndef LOG_CONF_LEVEL_TCPIP

@@ -53,7 +53,7 @@
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "TCP/IP"
-#define LOG_LEVEL LOG_LEVEL_TCPIP
+#define LOG_LEVEL LOG_LEVEL_INFO//GMU-MI LOG_LEVEL_TCPIP
 
 #ifdef UIP_FALLBACK_INTERFACE
 extern struct uip_fallback_interface UIP_FALLBACK_INTERFACE;

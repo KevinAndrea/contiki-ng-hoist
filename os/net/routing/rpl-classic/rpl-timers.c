@@ -198,7 +198,12 @@ handle_dio_timer(void *ptr)
   }
 
   if(LOG_DBG_ENABLED) {
-    rpl_print_neighbor_list();
+    /* GMU-MI
+     * Adding instance as the argument.
+     * - If NULL, it defaults to default_instance */
+    //rpl_print_neighbor_list();
+    rpl_print_neighbor_list(instance);
+    /* GMU-MU END */
   }
 }
 /*---------------------------------------------------------------------------*/
@@ -384,6 +389,9 @@ get_probing_delay(rpl_dag_t *dag)
   return ((RPL_PROBING_INTERVAL) / 2) + random_rand() % (RPL_PROBING_INTERVAL);
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Replacing refs to global rpl_parents with DAG specific one
+ */
 rpl_parent_t *
 get_probing_target(rpl_dag_t *dag)
 {
@@ -414,6 +422,8 @@ get_probing_target(rpl_dag_t *dag)
   if(dag->preferred_parent != NULL && !rpl_parent_is_fresh(dag->preferred_parent)) {
     return dag->preferred_parent;
   }
+
+  nbr_table_t *rpl_parents = dag->rpl_parents;
 
   /* With 50% probability: probe best non-fresh parent */
   if(random_rand() % 2 == 0) {
@@ -495,7 +505,12 @@ handle_probing_timer(void *ptr)
   rpl_schedule_probing(instance);
 
   if(LOG_DBG_ENABLED) {
-    rpl_print_neighbor_list();
+    /* GMU-MI
+     * Adding instance as the argument.
+     * - If NULL, it defaults to default_instance */
+    //rpl_print_neighbor_list();
+    rpl_print_neighbor_list(instance);
+    /* GMU-MU END */
   }
 }
 /*---------------------------------------------------------------------------*/

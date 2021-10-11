@@ -57,14 +57,24 @@
 #define LOG_LEVEL LOG_LEVEL_NONE
 
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Adding instance as argument for Multi Instances.
+ * Rank is meaningless in an MI situation without that context.
+ * If instance arg is NULL, revert to default_instance. */
+//static rpl_rank_t
+//get_rank(const linkaddr_t *lladdr)
 static rpl_rank_t
-get_rank(const linkaddr_t *lladdr)
+get_rank(const linkaddr_t *lladdr, rpl_instance_t *instance)
 {
-  rpl_parent_t *p = rpl_get_parent((uip_lladdr_t *)lladdr);
+  if(instance == NULL) {
+    instance = default_instance;
+  }
+
+  rpl_parent_t *p = rpl_get_parent((uip_lladdr_t *)lladdr, instance);
   if(p == NULL) {
     return RPL_INFINITE_RANK;
   } else {
-    rpl_instance_t *instance = rpl_get_default_instance();
+  //  rpl_instance_t *instance = rpl_get_default_instance();
     return instance != NULL ? instance->of->rank_via_parent(p) : RPL_INFINITE_RANK;
   }
 }
@@ -72,19 +82,37 @@ get_rank(const linkaddr_t *lladdr)
 const linkaddr_t *
 rpl_nbr_gc_get_worst(const linkaddr_t *lladdr1, const linkaddr_t *lladdr2)
 {
-  return get_rank(lladdr2) > get_rank(lladdr1) ? lladdr2 : lladdr1;
+  /* GMU-MI
+   * Instance information is needed, however, most functions leading to this
+   *  do not have access to that information.  As this is only invoked
+   *  if the table is full, I'm setting these get_rank calls to pass in NULL
+   *  so the get_rank function will just use the default instance.
+   */
+  //return get_rank(lladdr2) > get_rank(lladdr1) ? lladdr2 : lladdr1;
+  return get_rank(lladdr2, NULL) > get_rank(lladdr1, NULL) ? lladdr2 : lladdr1;
+  /* GMU-MI END */
 }
 /*---------------------------------------------------------------------------*/
 static bool
 can_accept_new_parent(const linkaddr_t *candidate_for_removal, rpl_dio_t *dio)
 {
   rpl_rank_t rank_candidate;
+
+  /* GMU-MI
+   * Replacing instance from DIO instead of default instance.
+   * Updating get_rank to use instance Information
+   */
+  rpl_instance_t *instance = rpl_get_instance(dio->instance_id);
+  if(instance == NULL) {
+    instance = default_instance;
+  }
+
   /* There's space left in the table or the worst entry has no rank: accept */
   if(candidate_for_removal == NULL
-     || (rank_candidate = get_rank(candidate_for_removal)) == RPL_INFINITE_RANK) {
+     || (rank_candidate = get_rank(candidate_for_removal, instance)) == RPL_INFINITE_RANK) {
     return true;
   } else {
-    rpl_instance_t *instance = rpl_get_default_instance();
+    //rpl_instance_t *instance = rpl_get_default_instance();
     rpl_rank_t new_path_rank;
 
     if(instance == NULL || dio == NULL) {

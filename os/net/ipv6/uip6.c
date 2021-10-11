@@ -88,7 +88,7 @@
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "IPv6"
-#define LOG_LEVEL LOG_LEVEL_IPV6
+#define LOG_LEVEL LOG_LEVEL_INFO//GMU-MI LOG_LEVEL_IPV6
 
 #if UIP_STATISTICS == 1
 struct uip_stats uip_stat;
@@ -2050,7 +2050,7 @@ uip_process(uint8_t flag)
     if((UIP_TCP_BUF->flags & TCP_URG) != 0) {
       tmp16 = (UIP_TCP_BUF->urgp[0] << 8) | UIP_TCP_BUF->urgp[1];
       if(tmp16 > uip_len) {
-        /* There is more urgent data in the next segment to come. 
+        /* There is more urgent data in the next segment to come.
 	     Cap the urgent data length at the segment length for
 	     further processing. */
         tmp16 = uip_len;

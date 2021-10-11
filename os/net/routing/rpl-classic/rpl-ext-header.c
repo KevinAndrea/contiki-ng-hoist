@@ -55,12 +55,15 @@
 #include "sys/log.h"
 
 #define LOG_MODULE "RPL"
-#define LOG_LEVEL LOG_LEVEL_RPL
+#define LOG_LEVEL LOG_LEVEL_INFO//LOG_LEVEL_RPL
 
 #include <limits.h>
 #include <string.h>
 
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Replacing refs to global rpl_parents with DAG specific, using instance
+ */
 int
 rpl_ext_header_hbh_update(uint8_t *ext_buf, int opt_offset)
 {
@@ -116,6 +119,8 @@ rpl_ext_header_hbh_update(uint8_t *ext_buf, int opt_offset)
     down = 1;
   }
 
+  nbr_table_t *rpl_parents = instance->current_dag->rpl_parents;
+
   sender_rank = UIP_HTONS(rpl_opt->senderrank);
   sender = nbr_table_get_from_lladdr(rpl_parents, packetbuf_addr(PACKETBUF_ADDR_SENDER));
 
@@ -158,6 +163,7 @@ rpl_ext_header_hbh_update(uint8_t *ext_buf, int opt_offset)
     }
     LOG_WARN("Single error tolerated\n");
     RPL_STAT(rpl_stats.loop_warnings++);
+  printf("ERROR: OPT RANK SET TO ERROR\n");
     rpl_opt->flags |= RPL_HDR_OPT_RANK_ERR;
     return 1;
   }
@@ -464,7 +470,12 @@ update_hbh_header(void)
           /* We should send back the packet to the originating parent,
                 but it is not feasible yet, so we send a No-Path DAO instead */
           LOG_WARN("RPL generate No-Path DAO\n");
-          parent = rpl_get_parent((uip_lladdr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER));
+          /* GMU-MI
+           * Adding instance as an argument.  If NULL, default_instance is used*/
+          //parent = rpl_get_parent((uip_lladdr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER));
+          parent = rpl_get_parent((uip_lladdr_t *)packetbuf_addr(PACKETBUF_ADDR_SENDER),
+                                   instance);
+          /* GMU-MI END */
           if(parent != NULL) {
             dao_output_target(parent, &UIP_IP_BUF->destipaddr, RPL_ZERO_LIFETIME);
           }
@@ -481,6 +492,7 @@ update_hbh_header(void)
           rpl_opt->flags &= ~RPL_HDR_OPT_DOWN;
           LOG_DBG("RPL option going up\n");
         } else {
+printf("DAO ROUTE FOUND, SETTING DOWN\n");
           /* A DAO route was found so we set the down flag. */
           rpl_opt->flags |= RPL_HDR_OPT_DOWN;
           LOG_DBG("RPL option going down\n");

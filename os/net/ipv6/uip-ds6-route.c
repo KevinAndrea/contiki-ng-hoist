@@ -49,7 +49,7 @@
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "IPv6 Route"
-#define LOG_LEVEL LOG_LEVEL_IPV6
+#define LOG_LEVEL LOG_LEVEL_INFO //GMU-MI LOG_LEVEL_IPV6
 
 #if BUILD_WITH_ORCHESTRA
 

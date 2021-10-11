@@ -62,7 +62,7 @@
 #include <string.h>
 
 #define LOG_MODULE "RPL"
-#define LOG_LEVEL LOG_LEVEL_RPL
+#define LOG_LEVEL LOG_LEVEL_INFO//LOG_LEVEL_RPL
 
 /* A configurable function called after every RPL parent switch */
 #ifdef RPL_CALLBACK_PARENT_SWITCH
@@ -84,25 +84,45 @@ static rpl_of_t * const objective_functions[] = RPL_SUPPORTED_OFS;
 
 /*---------------------------------------------------------------------------*/
 /* Per-parent RPL information */
-NBR_TABLE_GLOBAL(rpl_parent_t, rpl_parents);
+/* GMU-MI
+ * Replacing this global definition with a per-DAG one */
+//NBR_TABLE_GLOBAL(rpl_parent_t, rpl_parents);
+/* GMU-MI END */
+
+/* GMU-MI
+ * This creates a static array of parents tables.  The DAG struct only
+ *  carries a reference to the appropriate entry to save memory.
+ */
+  static nbr_table_t rpl_parents_table[RPL_MAX_INSTANCES];
+  static rpl_parent_t rpl_parents_memory[RPL_MAX_INSTANCES][NBR_TABLE_MAX_NEIGHBORS];
+/* GMU-MU END */
 /*---------------------------------------------------------------------------*/
 /* Allocate instance table. */
 rpl_instance_t instance_table[RPL_MAX_INSTANCES];
 rpl_instance_t *default_instance;
 
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Refactoring with an Instance arg.  If NULL, set instance to default_instance
+ * - Replacing all default_instance with instance. */
+//void
+//rpl_print_neighbor_list(void)
 void
-rpl_print_neighbor_list(void)
+rpl_print_neighbor_list(rpl_instance_t *instance)
 {
-  if(default_instance != NULL && default_instance->current_dag != NULL &&
-      default_instance->of != NULL) {
-    int curr_dio_interval = default_instance->dio_intcurrent;
-    int curr_rank = default_instance->current_dag->rank;
-    rpl_parent_t *p = nbr_table_head(rpl_parents);
+  if(instance == NULL) {
+    instance = default_instance;
+  }
+
+  if(instance != NULL && instance->current_dag != NULL &&
+      instance->of != NULL) {
+    int curr_dio_interval = instance->dio_intcurrent;
+    int curr_rank = instance->current_dag->rank;
+    rpl_parent_t *p = nbr_table_head(instance->current_dag->rpl_parents);
     clock_time_t clock_now = clock_time();
 
     LOG_DBG("RPL: MOP %u OCP %u rank %u dioint %u, nbr count %u\n",
-        default_instance->mop, default_instance->of->ocp, curr_rank, curr_dio_interval, uip_ds6_nbr_num());
+        instance->mop, instance->of->ocp, curr_rank, curr_dio_interval, uip_ds6_nbr_num());
     while(p != NULL) {
       const struct link_stats *stats = rpl_get_parent_link_stats(p);
       uip_ipaddr_t *parent_addr = rpl_parent_get_ipaddr(p);
@@ -113,14 +133,19 @@ rpl_print_neighbor_list(void)
           rpl_rank_via_parent(p),
           stats != NULL ? stats->freshness : 0,
           link_stats_is_fresh(stats) ? 'f' : ' ',
-          p == default_instance->current_dag->preferred_parent ? 'p' : ' ',
+          p == instance->current_dag->preferred_parent ? 'p' : ' ',
           stats != NULL ? (unsigned)((clock_now - stats->last_tx_time) / (60 * CLOCK_SECOND)) : -1u
       );
-      p = nbr_table_next(rpl_parents, p);
+      /* GMU-MI
+       * Replaced global rpl_parents with access through instance->current_dag*/
+      //p = nbr_table_next(rpl_parents, p);
+      p = nbr_table_next(instance->current_dag->rpl_parents, p);
+      /* GMU-MU END */
     }
     LOG_DBG("RPL: end of list\n");
   }
 }
+/* GMu-MI END */
 /*---------------------------------------------------------------------------*/
 uip_ds6_nbr_t *
 rpl_get_nbr(rpl_parent_t *parent)
@@ -142,20 +167,43 @@ nbr_callback(void *ptr)
 void
 rpl_dag_init(void)
 {
-  nbr_table_register(rpl_parents, (nbr_table_callback *)nbr_callback);
+  /* GMU-MI
+   * Moved to rpl_dag to support DAG level rpl_parents */
+  //nbr_table_register(rpl_parents, (nbr_table_callback *)nbr_callback);
+  /* GMU-MI END */
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Adding Instance as an argument.  If inst is NULL, revert to default_instance.
+ */
+//rpl_parent_t *
+//rpl_get_parent(const uip_lladdr_t *addr)
 rpl_parent_t *
-rpl_get_parent(const uip_lladdr_t *addr)
+rpl_get_parent(const uip_lladdr_t *addr, rpl_instance_t *instance)
 {
-  rpl_parent_t *p = nbr_table_get_from_lladdr(rpl_parents, (const linkaddr_t *)addr);
+  if(instance == NULL) {
+    instance = default_instance;
+  }
+
+  rpl_parent_t *p = nbr_table_get_from_lladdr(instance->current_dag->rpl_parents,
+                                              (const linkaddr_t *)addr);
   return p;
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Adding Instance as an argument.  If inst is NULL, revert to default_instance.
+ */
+//rpl_rank_t
+//rpl_get_parent_rank(uip_lladdr_t *addr)
 rpl_rank_t
-rpl_get_parent_rank(uip_lladdr_t *addr)
+rpl_get_parent_rank(uip_lladdr_t *addr, rpl_instance_t *instance)
 {
-  rpl_parent_t *p = nbr_table_get_from_lladdr(rpl_parents, (linkaddr_t *)addr);
+  if(instance == NULL) {
+    instance = default_instance;
+  }
+
+  rpl_parent_t *p = nbr_table_get_from_lladdr(instance->current_dag->rpl_parents,
+                                              (linkaddr_t *)addr);
   if(p != NULL) {
     return p->rank;
   } else {
@@ -187,10 +235,22 @@ rpl_rank_via_parent(rpl_parent_t *p)
   return RPL_INFINITE_RANK;
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Getting Instance from parent->dag.
+ * If inst is NULL, revert to default_instance.
+ */
 const linkaddr_t *
 rpl_get_parent_lladdr(rpl_parent_t *p)
 {
-  return nbr_table_get_lladdr(rpl_parents, p);
+  rpl_instance_t *instance = NULL;
+  if(p != NULL && p->dag != NULL) {
+    instance = p->dag->instance;
+    if(instance == NULL) {
+      instance = default_instance;
+    }
+  }
+
+  return nbr_table_get_lladdr(instance->current_dag->rpl_parents, p);
 }
 /*---------------------------------------------------------------------------*/
 uip_ipaddr_t *
@@ -233,10 +293,21 @@ rpl_parent_is_reachable(rpl_parent_t *p) {
   }
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Getting Instance from dag.
+ * If inst is NULL, revert to default_instance.
+ */
 static void
 rpl_set_preferred_parent(rpl_dag_t *dag, rpl_parent_t *p)
 {
   if(dag != NULL && dag->preferred_parent != p) {
+    rpl_instance_t *instance = dag->instance;
+    if(instance == NULL) {
+      instance = default_instance;
+    }
+    uip_ds6_addr_t *addr = uip_ds6_get_global(ADDR_PREFERRED);
+    uip_ipaddr_t *par_addr = rpl_parent_get_ipaddr(p);
+    printf("[PAR],0x%02x,%d,%d\n", dag->instance->instance_id, addr->ipaddr.u8[15], par_addr->u8[15]);
     LOG_INFO("rpl_set_preferred_parent ");
     if(p != NULL) {
       LOG_INFO_6ADDR(rpl_parent_get_ipaddr(p));
@@ -257,8 +328,8 @@ rpl_set_preferred_parent(rpl_dag_t *dag, rpl_parent_t *p)
 
     /* Always keep the preferred parent locked, so it remains in the
      * neighbor table. */
-    nbr_table_unlock(rpl_parents, dag->preferred_parent);
-    nbr_table_lock(rpl_parents, p);
+    nbr_table_unlock(instance->current_dag->rpl_parents, dag->preferred_parent);
+    nbr_table_lock(instance->current_dag->rpl_parents, p);
     dag->preferred_parent = p;
   }
 }
@@ -280,10 +351,18 @@ lollipop_greater_than(int a, int b)
 }
 /*---------------------------------------------------------------------------*/
 /* Remove DAG parents with a rank that is at least the same as minimum_rank. */
+/* GMU-MI
+ * Getting Parents Table from dag.
+ */
 static void
 remove_parents(rpl_dag_t *dag, rpl_rank_t minimum_rank)
 {
   rpl_parent_t *p;
+  nbr_table_t *rpl_parents = NULL;
+
+  if(dag != NULL) {
+    rpl_parents = dag->rpl_parents;
+  }
 
   LOG_INFO("Removing parents (minimum rank %u)\n", minimum_rank);
 
@@ -296,10 +375,18 @@ remove_parents(rpl_dag_t *dag, rpl_rank_t minimum_rank)
   }
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Getting Parents Table from dag.
+ */
 static void
 nullify_parents(rpl_dag_t *dag, rpl_rank_t minimum_rank)
 {
   rpl_parent_t *p;
+  nbr_table_t *rpl_parents = NULL;
+
+  if(dag != NULL) {
+    rpl_parents = dag->rpl_parents;
+  }
 
   LOG_INFO("Nullifying parents (minimum rank %u)\n", minimum_rank);
 
@@ -587,6 +674,10 @@ rpl_alloc_instance(uint8_t instance_id)
   return NULL;
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Adds in the initialization of the rpl_parents_table and the assignment of
+ *  that table to the dag.
+ */
 rpl_dag_t *
 rpl_alloc_dag(uint8_t instance_id, uip_ipaddr_t *dag_id)
 {
@@ -609,6 +700,21 @@ rpl_alloc_dag(uint8_t instance_id, uip_ipaddr_t *dag_id)
       dag->rank = RPL_INFINITE_RANK;
       dag->min_rank = RPL_INFINITE_RANK;
       dag->instance = instance;
+
+      uint8_t instance_index = 0;
+      while(instance_table[instance_index].instance_id != instance->instance_id) {
+        ++instance_index;
+      }
+
+      /* Pulling this initialization from NBR_TABLE_GLOBAL macro */
+      rpl_parents_table[instance_index].index = 0;
+      rpl_parents_table[instance_index].item_size = sizeof(rpl_parent_t);
+      rpl_parents_table[instance_index].callback = NULL;
+      rpl_parents_table[instance_index].data = &rpl_parents_memory[instance_index][0];
+      nbr_table_t *rpl_parents = &rpl_parents_table[instance_index];
+      nbr_table_register(rpl_parents, (nbr_table_callback *) nbr_callback);
+      dag->rpl_parents = rpl_parents;
+
       return dag;
     }
   }
@@ -688,10 +794,17 @@ rpl_free_dag(rpl_dag_t *dag)
   dag->used = 0;
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Getting instance from dag for rpl_parents
+ */
 rpl_parent_t *
 rpl_add_parent(rpl_dag_t *dag, rpl_dio_t *dio, uip_ipaddr_t *addr)
 {
   rpl_parent_t *p = NULL;
+  nbr_table_t *rpl_parents = NULL;
+  if(dag != NULL) {
+    rpl_parents = dag->rpl_parents;
+  }
   /* Is the parent known by ds6? Drop this request if not.
    * Typically, the parent is added upon receiving a DIO. */
   const uip_lladdr_t *lladdr = uip_ds6_nbr_lladdr_from_ipaddr(addr);
@@ -718,18 +831,46 @@ rpl_add_parent(rpl_dag_t *dag, rpl_dio_t *dio, uip_ipaddr_t *addr)
   return p;
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * rpl_parents is no longer global, so here, adding to iterate through all
+ *  instances until one call to nbr_table_get_from_lladdr returns !NULL
+ */
+/* !!! Commenting out entire function due to lack of use.
 static rpl_parent_t *
 find_parent_any_dag_any_instance(uip_ipaddr_t *addr)
 {
   uip_ds6_nbr_t *ds6_nbr = uip_ds6_nbr_lookup(addr);
   const uip_lladdr_t *lladdr = uip_ds6_nbr_get_ll(ds6_nbr);
-  return nbr_table_get_from_lladdr(rpl_parents, (linkaddr_t *)lladdr);
+  //return nbr_table_get_from_lladdr(rpl_parents, (linkaddr_t *)lladdr);
+  uint8_t instance_index;
+  rpl_instance_t *instance;
+  void *item = NULL;
+  for(instance_index = 0; instance_index < RPL_MAX_INSTANCES; ++instance_index) {
+    instance = &instance_table[instance_index];
+    if(instance->used == 1) {
+      item = nbr_table_get_from_lladdr(instance->current_dag->rpl_parents,
+                                       (linkaddr_t *)lladdr);
+      if(item != NULL) {
+        return item;
+      }
+    }
+  }
+  // Fallback, no viable parents were found
+  return NULL;
 }
+*/
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * This is just wrong.  Rewriting this to only pull from the given DAG. */
 rpl_parent_t *
 rpl_find_parent(rpl_dag_t *dag, uip_ipaddr_t *addr)
 {
-  rpl_parent_t *p = find_parent_any_dag_any_instance(addr);
+  //rpl_parent_t *p = find_parent_any_dag_any_instance(addr);
+  uip_ds6_nbr_t *ds6_nbr = uip_ds6_nbr_lookup(addr);
+  const uip_lladdr_t *lladdr = uip_ds6_nbr_get_ll(ds6_nbr);
+  rpl_parent_t *p = NULL;
+  p = nbr_table_get_from_lladdr(dag->rpl_parents, (linkaddr_t *)lladdr);
+
   if(p != NULL && p->dag == dag) {
     return p;
   } else {
@@ -737,10 +878,14 @@ rpl_find_parent(rpl_dag_t *dag, uip_ipaddr_t *addr)
   }
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * This is just wrong.  Rewriting this to only pull from the given Instance. */
 static rpl_dag_t *
 find_parent_dag(rpl_instance_t *instance, uip_ipaddr_t *addr)
 {
-  rpl_parent_t *p = find_parent_any_dag_any_instance(addr);
+  //rpl_parent_t *p = find_parent_any_dag_any_instance(addr);
+  rpl_parent_t *p = rpl_find_parent(instance->current_dag, addr);
+
   if(p != NULL) {
     return p->dag;
   } else {
@@ -748,10 +893,23 @@ find_parent_dag(rpl_instance_t *instance, uip_ipaddr_t *addr)
   }
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Rewriting this to only pull from the given Instance.
+ * - Iterates all DAGs in the Instance.
+ */
 rpl_parent_t *
 rpl_find_parent_any_dag(rpl_instance_t *instance, uip_ipaddr_t *addr)
 {
-  rpl_parent_t *p = find_parent_any_dag_any_instance(addr);
+  //rpl_parent_t *p = find_parent_any_dag_any_instance(addr);
+  rpl_parent_t *p = NULL;
+  int i;
+  for(i = 0; i < RPL_MAX_DAG_PER_INSTANCE && p == NULL; i++) {
+    rpl_dag_t *dag = &instance->dag_table[i];
+    if(dag->used == 1) {
+      p = rpl_find_parent(dag, addr);
+    }
+  }
+
   if(p && p->dag && p->dag->instance == instance) {
     return p;
   } else {
@@ -847,7 +1005,12 @@ rpl_select_dag(rpl_instance_t *instance, rpl_parent_t *p)
     rpl_schedule_dao(instance);
     rpl_reset_dio_timer(instance);
     if(LOG_DBG_ENABLED) {
-      rpl_print_neighbor_list();
+      /* GMU-MI
+       * Adding instance as the argument.
+       * - If NULL, it defaults to default_instance */
+      //rpl_print_neighbor_list();
+      rpl_print_neighbor_list(instance);
+      /* GMU-MU END */
     }
   } else if(best_dag->rank != old_rank) {
     LOG_DBG("RPL: Preferred parent update, rank changed from %u to %u\n",
@@ -856,17 +1019,22 @@ rpl_select_dag(rpl_instance_t *instance, rpl_parent_t *p)
   return best_dag;
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Replacing global rpl_parents to reference the proper tables by DAG
+ */
 static rpl_parent_t *
 best_parent(rpl_dag_t *dag, int fresh_only)
 {
   rpl_parent_t *p;
   rpl_of_t *of;
   rpl_parent_t *best = NULL;
+  nbr_table_t *rpl_parents;
 
   if(dag == NULL || dag->instance == NULL || dag->instance->of == NULL) {
     return NULL;
   }
 
+  rpl_parents = dag->rpl_parents;
   of = dag->instance->of;
   /* Search for the best parent according to the OF */
   for(p = nbr_table_head(rpl_parents); p != NULL; p = nbr_table_next(rpl_parents, p)) {
@@ -936,16 +1104,21 @@ rpl_select_parent(rpl_dag_t *dag)
   return dag->preferred_parent;
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Replacing the global rpl_parents with the table from the dag.
+ */
 void
 rpl_remove_parent(rpl_parent_t *parent)
 {
+  rpl_dag_t *dag = parent->dag;
+
   LOG_INFO("Removing parent ");
   LOG_INFO_6ADDR(rpl_parent_get_ipaddr(parent));
   LOG_INFO_("\n");
 
   rpl_nullify_parent(parent);
 
-  nbr_table_remove(rpl_parents, parent);
+  nbr_table_remove(dag->rpl_parents, parent);
 }
 /*---------------------------------------------------------------------------*/
 void
@@ -1364,6 +1537,9 @@ rpl_local_repair(rpl_instance_t *instance)
   RPL_STAT(rpl_stats.local_repairs++);
 }
 /*---------------------------------------------------------------------------*/
+/* GMU-MI
+ * Adding an outer loop to iterate across all parent tables by instance.
+ */
 void
 rpl_recalculate_ranks(void)
 {
@@ -1374,16 +1550,25 @@ rpl_recalculate_ranks(void)
    * than RPL protocol messages. This periodical recalculation is called
    * from a timer in order to keep the stack depth reasonably low.
    */
-  p = nbr_table_head(rpl_parents);
-  while(p != NULL) {
-    if(p->dag != NULL && p->dag->instance && (p->flags & RPL_PARENT_FLAG_UPDATED)) {
-      p->flags &= ~RPL_PARENT_FLAG_UPDATED;
-      LOG_DBG("rpl_process_parent_event recalculate_ranks\n");
-      if(!rpl_process_parent_event(p->dag->instance, p)) {
-        LOG_DBG("A parent was dropped\n");
+
+  rpl_instance_t *instance;
+  uint8_t instance_index;
+
+  for(instance_index = 0; instance_index < RPL_MAX_INSTANCES; ++instance_index) {
+    instance = &instance_table[instance_index];
+    if(instance->used == 1) {
+      p = nbr_table_head(instance->current_dag->rpl_parents);
+      while(p != NULL) {
+        if(p->dag != NULL && p->dag->instance && (p->flags & RPL_PARENT_FLAG_UPDATED)) {
+          p->flags &= ~RPL_PARENT_FLAG_UPDATED;
+          LOG_DBG("rpl_process_parent_event recalculate_ranks\n");
+          if(!rpl_process_parent_event(p->dag->instance, p)) {
+            LOG_DBG("A parent was dropped\n");
+          }
+        }
+        p = nbr_table_next(instance->current_dag->rpl_parents, p);
       }
     }
-    p = nbr_table_next(rpl_parents, p);
   }
 }
 /*---------------------------------------------------------------------------*/
