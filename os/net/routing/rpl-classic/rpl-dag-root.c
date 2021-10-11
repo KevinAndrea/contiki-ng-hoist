@@ -43,6 +43,8 @@
 #define LOG_MODULE "RPL"
 #define LOG_LEVEL LOG_LEVEL_RPL
 
+uint8_t g_rpl_custom_instance = RPL_DEFAULT_INSTANCE;
+
 /*---------------------------------------------------------------------------*/
 static void
 set_global_address(uip_ipaddr_t *prefix, uip_ipaddr_t *iid)
@@ -121,7 +123,7 @@ rpl_dag_root_start(void)
       uip_ipaddr_t prefix;
       const uip_ipaddr_t *default_prefix;
 
-      rpl_set_root(RPL_DEFAULT_INSTANCE, ipaddr);
+      rpl_set_root(g_rpl_custom_instance, ipaddr);
       dag = rpl_get_any_dag();
       default_prefix = uip_ds6_default_prefix();
 

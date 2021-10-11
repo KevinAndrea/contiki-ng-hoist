@@ -237,6 +237,11 @@ static void
 rpl_set_preferred_parent(rpl_dag_t *dag, rpl_parent_t *p)
 {
   if(dag != NULL && dag->preferred_parent != p) {
+    /* RPL PAR information - GMU */
+    uip_ds6_addr_t *addr = uip_ds6_get_global(ADDR_PREFERRED);
+    uip_ipaddr_t *par_addr = rpl_parent_get_ipaddr(p);
+    printf("[PAR],0x%02x,%d,%d\n", dag->instance->instance_id, addr->ipaddr.u8[15], par_addr->u8[15]);
+
     LOG_INFO("rpl_set_preferred_parent ");
     if(p != NULL) {
       LOG_INFO_6ADDR(rpl_parent_get_ipaddr(p));
