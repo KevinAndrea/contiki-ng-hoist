@@ -44,7 +44,7 @@
 #define LOG_LEVEL LOG_LEVEL_RPL
 
 // Defines a global to be overridden when RPL_CONF_CUSTOM_INSTANCE is defined.
-uint8_t g_rpl_custom_instance = RPL_DEFAULT_INSTANCE;
+uint8_t g_rpl_custom_instance = RPL_DEFAULT_INSTANCE; // GMU-MI
 
 /*---------------------------------------------------------------------------*/
 static void
@@ -125,7 +125,7 @@ rpl_dag_root_start(void)
       const uip_ipaddr_t *default_prefix;
 
 // If the build uses a custom instance, then let the app set the global.
-#ifdef RPL_CONF_CUSTOM_INSTANCE
+#ifdef RPL_CONF_CUSTOM_INSTANCE // GMU-MI
       rpl_set_root(g_rpl_custom_instance, ipaddr);
 #else // No custom instances in project files, use default
       rpl_set_root(RPL_DEFAULT_INSTANCE, ipaddr);

@@ -62,7 +62,7 @@
 #include <string.h>
 
 #define LOG_MODULE "RPL"
-#define LOG_LEVEL LOG_LEVEL_INFO//LOG_LEVEL_RPL
+#define LOG_LEVEL LOG_LEVEL_INFO //LOG_LEVEL_RPL GMU-MI
 
 /* A configurable function called after every RPL parent switch */
 #ifdef RPL_CALLBACK_PARENT_SWITCH
@@ -145,7 +145,7 @@ rpl_print_neighbor_list(rpl_instance_t *instance)
     LOG_DBG("RPL: end of list\n");
   }
 }
-/* GMu-MI END */
+/* GMU-MI END */
 /*---------------------------------------------------------------------------*/
 uip_ds6_nbr_t *
 rpl_get_nbr(rpl_parent_t *parent)
@@ -168,7 +168,7 @@ void
 rpl_dag_init(void)
 {
   /* GMU-MI
-   * Moved to rpl_dag to support DAG level rpl_parents */
+   * Moved to rpl_alloc_dag to support DAG level rpl_parents */
   //nbr_table_register(rpl_parents, (nbr_table_callback *)nbr_callback);
   /* GMU-MI END */
 }

@@ -55,7 +55,7 @@
 #include "sys/log.h"
 
 #define LOG_MODULE "RPL"
-#define LOG_LEVEL LOG_LEVEL_INFO//LOG_LEVEL_RPL
+#define LOG_LEVEL LOG_LEVEL_INFO // LOG_LEVEL_RPL  GMU-MI
 
 #include <limits.h>
 #include <string.h>
@@ -119,6 +119,7 @@ rpl_ext_header_hbh_update(uint8_t *ext_buf, int opt_offset)
     down = 1;
   }
 
+  /* GMU-MI - Adding reference to proper RPL Parents table */
   nbr_table_t *rpl_parents = instance->current_dag->rpl_parents;
 
   sender_rank = UIP_HTONS(rpl_opt->senderrank);
@@ -163,6 +164,7 @@ rpl_ext_header_hbh_update(uint8_t *ext_buf, int opt_offset)
     }
     LOG_WARN("Single error tolerated\n");
     RPL_STAT(rpl_stats.loop_warnings++);
+    /* GMU-MI : Temporary output for debugging */
   printf("ERROR: OPT RANK SET TO ERROR\n");
     rpl_opt->flags |= RPL_HDR_OPT_RANK_ERR;
     return 1;
@@ -492,6 +494,7 @@ update_hbh_header(void)
           rpl_opt->flags &= ~RPL_HDR_OPT_DOWN;
           LOG_DBG("RPL option going up\n");
         } else {
+/* GMU-MI : Temporary output for debugging */
 printf("DAO ROUTE FOUND, SETTING DOWN\n");
           /* A DAO route was found so we set the down flag. */
           rpl_opt->flags |= RPL_HDR_OPT_DOWN;
@@ -614,7 +617,6 @@ rpl_ext_header_update(void)
   if(dest_instance == NULL) {
     dest_instance = default_instance;
   }
-  /* GMU-MI END */
 
   if(dest_instance == NULL || dest_instance->current_dag == NULL
       || uip_is_addr_linklocal(&UIP_IP_BUF->destipaddr) || uip_is_addr_mcast(&UIP_IP_BUF->destipaddr)) {
@@ -642,6 +644,7 @@ rpl_ext_header_update(void)
       /* Insert HBH option at source. Checking the address is not sufficient because
        * in non-storing mode, a packet may go up and then down the same path again */
       return insert_hbh_header(dest_instance);
+  /* GMU-MI END */
     } else {
       /* Update HBH option at forwarders */
       return update_hbh_header();

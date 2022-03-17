@@ -423,6 +423,7 @@ get_probing_target(rpl_dag_t *dag)
     return dag->preferred_parent;
   }
 
+  /* GMU-MI */
   nbr_table_t *rpl_parents = dag->rpl_parents;
 
   /* With 50% probability: probe best non-fresh parent */
