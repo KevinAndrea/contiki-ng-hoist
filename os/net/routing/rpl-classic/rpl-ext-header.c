@@ -488,14 +488,14 @@ update_hbh_header(void)
         /* Set the down extension flag correctly as described in Section
               11.2 of RFC6550. If the packet progresses along a DAO route,
               the down flag should be set. */
-        if(uip_ds6_route_lookup(&UIP_IP_BUF->destipaddr) == NULL) {
+        /* GMU-MI Modification - If dest is a root, then it's upwards */
+        if(rpl_get_instance_from_dest(&UIP_IP_BUF->destipaddr) != NULL) {
+//        if(uip_ds6_route_lookup(&UIP_IP_BUF->destipaddr) == NULL) {
           /* No route was found, so this packet will go towards the RPL
                 root. If so, we should not set the down flag. */
           rpl_opt->flags &= ~RPL_HDR_OPT_DOWN;
           LOG_DBG("RPL option going up\n");
         } else {
-/* GMU-MI : Temporary output for debugging */
-printf("DAO ROUTE FOUND, SETTING DOWN\n");
           /* A DAO route was found so we set the down flag. */
           rpl_opt->flags |= RPL_HDR_OPT_DOWN;
           LOG_DBG("RPL option going down\n");
