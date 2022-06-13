@@ -338,6 +338,22 @@ dio_input(void)
   memcpy(&dio.dag_id, buffer + i, sizeof(dio.dag_id));
   i += sizeof(dio.dag_id);
 
+  /* GMU-MI
+   * Modifications for Whitelist and Blacklist Featues
+   * - Set RPL_ALLOWED_INSTANCES (instance_id)
+   * - Set RPL_DISALLOWED_INSTANCE
+   */
+#ifdef RPL_ALLOWED_INSTANCES
+  if(strchr(RPL_ALLOWED_INSTANCE, (char)dio.instance_id) == NULL) {
+    return; /* No matching IID, Reject */
+  }
+#endif
+#ifdef RPL_DISALLOWED_INSTANCES
+  if(strchr(RPL_DISALLOWED_INSTANCE, (char)dio.instance_id) != NULL) {
+    return; /* Found a matching IID, Reject */
+  }
+#endif
+
   LOG_DBG("Incoming DIO (dag_id, pref) = (");
   LOG_DBG_6ADDR(&dio.dag_id);
   LOG_DBG_(", %u)\n", dio.preference);
