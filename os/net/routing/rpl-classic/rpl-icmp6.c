@@ -344,15 +344,16 @@ dio_input(void)
    * - Set RPL_DISALLOWED_INSTANCE
    */
 #ifdef RPL_ALLOWED_INSTANCES
-  if(strchr(RPL_ALLOWED_INSTANCE, (char)dio.instance_id) == NULL) {
-    return; /* No matching IID, Reject */
+  if(RPL_ALLOWED_INSTANCES != dio.instance_id) {
+    goto discard;
   }
 #endif
 #ifdef RPL_DISALLOWED_INSTANCES
-  if(strchr(RPL_DISALLOWED_INSTANCE, (char)dio.instance_id) != NULL) {
-    return; /* Found a matching IID, Reject */
+  if(RPL_DISALLOWED_INSTANCES == dio.instance_id) {
+    goto discard;
   }
 #endif
+
 
   LOG_DBG("Incoming DIO (dag_id, pref) = (");
   LOG_DBG_6ADDR(&dio.dag_id);
