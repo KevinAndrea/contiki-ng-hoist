@@ -236,6 +236,9 @@ struct rpl_instance {
   uint8_t dio_intmin;
   uint8_t dio_redundancy;
   uint8_t default_lifetime;
+  /* GMU-MI - Adding Coordinated Lifetime for Mobility */
+  uint8_t coordinated_lifetime;
+  /* END GMU-MI */
   uint8_t dio_intcurrent;
   uint8_t dio_send; /* for keeping track of which mode the timer is in */
   uint8_t dio_counter;
@@ -262,6 +265,9 @@ struct rpl_instance {
   struct ctimer dao_timer;
   struct ctimer dao_lifetime_timer;
   struct ctimer unicast_dio_timer;
+  /* GMU-MI - Adding Coordinated Lifetime Timer for Mobility */
+  struct ctimer coordinated_lifetime_timer;
+  /* END GMU-MI */  
   rpl_parent_t *unicast_dio_target;
 #if RPL_WITH_DAO_ACK
   struct ctimer dao_retransmit_timer;

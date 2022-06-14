@@ -345,6 +345,9 @@ void rpl_schedule_probing_now(rpl_instance_t *instance);
 
 void rpl_reset_dio_timer(rpl_instance_t *);
 void rpl_reset_periodic_timer(void);
+/* GMU-MI - Prototype for the coordinated lifetime handler */
+void handle_coordinated_lifetime_timer(void *ptr);
+/* END GMU-MI */
 
 /* Route poisoning. */
 void rpl_poison_routes(rpl_dag_t *, rpl_parent_t *);

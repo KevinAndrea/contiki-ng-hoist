@@ -756,6 +756,9 @@ rpl_free_instance(rpl_instance_t *instance)
   ctimer_stop(&instance->probing_timer);
 #endif /* RPL_WITH_PROBING */
   ctimer_stop(&instance->dio_timer);
+/* GMU-MI - Adding coordinated lifetime timer cessation */
+  ctimer_stop(&instance->coordinated_lifetime_timer);
+/* END GMU-MI */
   ctimer_stop(&instance->dao_timer);
   ctimer_stop(&instance->dao_lifetime_timer);
 
@@ -1345,6 +1348,11 @@ rpl_join_instance(uip_ipaddr_t *from, rpl_dio_t *dio)
   instance->dio_redundancy = dio->dag_redund;
   instance->default_lifetime = dio->default_lifetime;
   instance->lifetime_unit = dio->lifetime_unit;
+/* GMU-MI - Initialize and Start the coordinated lifetime system */
+  instance->coordinated_lifetime = instance->default_lifetime;
+  ctimer_set(&instance->coordinated_lifetime_timer, CLOCK_SECOND * instance->lifetime_unit, 
+            &handle_coordinated_lifetime_timer, instance);
+/* END GMU-MI */
 
   memcpy(&dag->dag_id, &dio->dag_id, sizeof(dio->dag_id));
 
@@ -1797,6 +1805,14 @@ rpl_process_dio(uip_ipaddr_t *from, rpl_dio_t *dio)
       LOG_INFO("Received consistent DIO\n");
       if(dag->joined) {
         instance->dio_counter++;
+/* GMU-MI - Reset the coordinated lifetime timer to the higher value (DIO vs Local) */
+        printf("LTI: Received Lifetime of %d\n", dio->default_lifetime);
+        if(dio->default_lifetime > instance->coordinated_lifetime) {
+          instance->coordinated_lifetime = dio->default_lifetime;
+          printf("LTI: Resetting CLTI to %d\n", instance->coordinated_lifetime);
+          rpl_reset_dio_timer(instance);
+        }
+/* END GMU-MI */
       }
     }
   }

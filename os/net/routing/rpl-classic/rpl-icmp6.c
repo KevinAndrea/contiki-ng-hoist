@@ -598,7 +598,18 @@ dio_output(rpl_instance_t *instance, uip_ipaddr_t *uc_addr)
   set16(buffer, pos, instance->of->ocp);
   pos += 2;
   buffer[pos++] = 0; /* reserved */
-  buffer[pos++] = instance->default_lifetime;
+
+  /* GMU-MI - All non-sink devices use coordinated lifetime instead of default */
+  printf("LTI: CDR vs RR = %d == %d?\n", instance->current_dag->rank, ROOT_RANK(instance));
+  if(instance->current_dag->rank == ROOT_RANK(instance)) {
+    buffer[pos++] = instance->default_lifetime;
+  }
+  /* Non-Root, use Coordinated Lifetime */
+  else {  
+    buffer[pos++] = instance->coordinated_lifetime;
+  }
+  /* END GMU-MI */
+  
   set16(buffer, pos, instance->lifetime_unit);
   pos += 2;
 

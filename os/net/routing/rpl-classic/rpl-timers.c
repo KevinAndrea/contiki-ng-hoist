@@ -206,6 +206,41 @@ handle_dio_timer(void *ptr)
     /* GMU-MU END */
   }
 }
+
+/*---------------------------------------------------------------------------*/
+/* GMU-MI - Adding Function to support Coordinated Lifetime
+ * When the coordinated lifetime timer procs, decrement the instance lifetime.
+ * If the instance lifetime is expired, remove instance.
+ */
+void
+handle_coordinated_lifetime_timer(void *ptr)
+{
+  rpl_instance_t *instance = (rpl_instance_t *)ptr;
+
+  /* Only proceed if the instance is in use */
+  if(instance->used) {
+    printf("LTI: Lifetime for 0x%x is %d\n", instance->instance_id, instance->coordinated_lifetime);
+    /* Decrement coordinated lifetime counter and check for expiry*/
+    if(instance->coordinated_lifetime <= 1) {
+      /* Stop all related timers and free the instance */
+      ctimer_stop(&instance->dio_timer);
+      ctimer_stop(&instance->dao_timer);
+      ctimer_stop(&instance->coordinated_lifetime_timer);
+
+      printf("LTI: Killing Instance 0x%d\n", instance->instance_id);
+
+      /* This also sets instance->used to 0 */
+      memset(instance, 0, sizeof(rpl_instance_t));
+    }
+    else {
+      instance->coordinated_lifetime--;
+      ctimer_reset(&instance->coordinated_lifetime_timer);
+      printf("LTI: Decrementing Lifetime for 0x%x to %d\n", instance->instance_id, instance->coordinated_lifetime);
+    }
+  }
+}
+/* END GMU-MI */
+
 /*---------------------------------------------------------------------------*/
 void
 rpl_reset_periodic_timer(void)
