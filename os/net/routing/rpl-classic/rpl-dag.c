@@ -1806,8 +1806,8 @@ rpl_process_dio(uip_ipaddr_t *from, rpl_dio_t *dio)
       if(dag->joined) {
         instance->dio_counter++;
 /* GMU-MI - Reset the coordinated lifetime timer to the higher value (DIO vs Local) */
-        printf("LTI: Received Lifetime of %d\n", dio->default_lifetime);
-        if(dio->default_lifetime > instance->coordinated_lifetime) {
+        printf("LTI: Received Lifetime of %d (rank == %d)\n", dio->default_lifetime, dio->rank);
+        if(dio->default_lifetime > instance->coordinated_lifetime && dio->rank != RPL_INFINITE_RANK) {
           instance->coordinated_lifetime = dio->default_lifetime;
           printf("LTI: Resetting CLTI to %d\n", instance->coordinated_lifetime);
           rpl_reset_dio_timer(instance);
