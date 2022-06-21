@@ -1,2 +1,0 @@
-# Multi-Instance Test Project
-
