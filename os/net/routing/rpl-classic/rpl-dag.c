@@ -414,8 +414,9 @@ should_refresh_routes(rpl_instance_t *instance, rpl_dio_t *dio, rpl_parent_t *p)
 static int
 acceptable_rank(rpl_dag_t *dag, rpl_rank_t rank)
 {
+  /* GMU-MI - Adding a check for Infinite DAG Rank. If DAG's rank is infinite, then anything is better. */
   return rank != RPL_INFINITE_RANK &&
-    ((dag->instance->max_rankinc == 0) ||
+    ((dag->instance->max_rankinc == 0) || (dag->rank == RPL_INFINITE_RANK) || 
      DAG_RANK(rank, dag->instance) <= DAG_RANK(dag->min_rank + dag->instance->max_rankinc, dag->instance));
 }
 /*---------------------------------------------------------------------------*/
@@ -1622,6 +1623,12 @@ rpl_process_parent_event(rpl_instance_t *instance, rpl_parent_t *p)
       rpl_local_repair(instance);
       return 0;
     }
+    /* GMU-MI - Candidate Fix for the Failure to Repair with good DIOs.
+     *        - This occurs when the candidate parent (p) is good, but the last parent is NULL.
+     *        - Instead of accepting p, it just gives up.  This fix accepts the candidate.
+     *        - Note: p already had been vetted earlier at this point.
+     */
+    instance->current_dag->preferred_parent = p;
   }
 
 #if LOG_DBG_ENABLED
