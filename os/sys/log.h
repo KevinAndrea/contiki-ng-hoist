@@ -233,6 +233,12 @@ extern struct log_module all_modules[];
 #define LOG_INFO_ENABLED       ((LOG_LEVEL) >= LOG_LEVEL_INFO)
 #define LOG_DBG_ENABLED        ((LOG_LEVEL) >= LOG_LEVEL_DBG)
 
+/* GMU-MI: Adding one Log Level */
+#define LOG_PRINTG(code, ...)     do {  \
+                                    LOG_OUTPUT("[%s: %s: %d: %s()] ", code, __FILE__, __LINE__, __func__); \
+                                    LOG_OUTPUT(__VA_ARGS__); \
+                                  } while (0)
+
 #if NETSTACK_CONF_WITH_IPV6
 
 /**

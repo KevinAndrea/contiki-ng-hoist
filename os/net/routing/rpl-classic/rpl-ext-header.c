@@ -609,13 +609,28 @@ rpl_ext_header_update(void)
    * - Added this block to set dest_instance to either the found instance
    *    of the destination, or the default_instance if not found.
    * - Changed all instances of default_instance to dest_instance below END */
+
+  /* GMU-MI (Added all below with exception of dest_instance = default_instance */
+  /* Destination is not a ROOT, grab the Instance ID from the Buffer Itself */
+  uint8_t protocol;
+  uint8_t *nxt_hdr = uipbuf_get_next_header(uip_buf, uip_len, &protocol, true);
+  struct uip_ext_hdr_opt_rpl *rpl_opt = (struct uip_ext_hdr_opt_rpl *)(nxt_hdr + 2);
+
   rpl_instance_t *dest_instance = NULL;
-  uip_ipaddr_t *dest = &UIP_IP_BUF->destipaddr;
-  if(dest) {
-    dest_instance = rpl_get_instance_from_dest(dest);
-  }
+  /* GMU-MI (Added all below with exception of dest_instance = default_instance */
+  /* Destination is not a ROOT, grab the Instance ID from the Buffer Itself */
+  /* Step 1: Try to get Instance from the Packet Itself */
+  dest_instance = rpl_get_instance(rpl_opt->instance);
   if(dest_instance == NULL) {
-    dest_instance = default_instance;
+    /* Step 2: If Dest is a Root, Grab it's known IID to use */
+    uip_ipaddr_t *dest = &UIP_IP_BUF->destipaddr;
+    if(dest) {
+      dest_instance = rpl_get_instance_from_dest(dest);
+    }
+    if(dest_instance == NULL) {
+      /* Step 3: All else failed, default to default_instance */
+      dest_instance = default_instance;
+    }
   }
 
   if(dest_instance == NULL || dest_instance->current_dag == NULL
