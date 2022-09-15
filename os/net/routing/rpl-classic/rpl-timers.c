@@ -223,14 +223,17 @@ handle_coordinated_lifetime_timer(void *ptr)
     /* Decrement coordinated lifetime counter and check for expiry*/
     if(instance->coordinated_lifetime <= 1) {
       /* Stop all related timers and free the instance */
+      /*
       ctimer_stop(&instance->dio_timer);
       ctimer_stop(&instance->dao_timer);
       ctimer_stop(&instance->coordinated_lifetime_timer);
-
-      printf("LTI: Killing Instance 0x%d\n", instance->instance_id);
-
+*/
       /* This also sets instance->used to 0 */
-      memset(instance, 0, sizeof(rpl_instance_t));
+      //memset(instance, 0, sizeof(rpl_instance_t));
+      //instance->used = 0;
+      rpl_free_instance(instance);
+      instance->used = 0;
+      printf("LTI: Kill Instance 0x%d\n", instance->instance_id);
     }
     else {
       instance->coordinated_lifetime--;
